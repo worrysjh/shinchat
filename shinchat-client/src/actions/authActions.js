@@ -21,3 +21,15 @@ export async function loginUser(user_name, passwd) {
     };
   }
 }
+
+export async function registeUser(user_name, passwd) {
+  try {
+    const response = await axios.post(
+      `${process.env.REACT_APP_API_URL}/auth/register`,
+      { user_name, passwd }
+    );
+    return { success: true, user_name: response.data.user_name };
+  } catch (err) {
+    return { success: false };
+  }
+}

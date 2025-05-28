@@ -1,4 +1,4 @@
-const pool = require("../../db");
+const pool = require("../models/db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { encryptData } = require("../utils/cryptoUtils");
@@ -15,12 +15,12 @@ async function registeUser(user_name, passwd) {
   }
 
   const hashedPasswd = await bcrypt.hash(passwd, 10);
-  await pool.query(`INSERT INTO users (user_name, passwd) values ($1, $2)`, [
-    user_name,
-    hashedPasswd,
-  ]);
+  const result = await pool.query(
+    `INSERT INTO users (user_name, passwd) values ($1, $2) RETURNING user_name`,
+    [user_name, hashedPasswd]
+  );
 
-  return { success: true };
+  return { success: true, user_name: result.rows[0].user_name };
 }
 
 // 로그인 기능

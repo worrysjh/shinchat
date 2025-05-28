@@ -8,13 +8,14 @@ const {
 // 회원가입
 async function register(req, res) {
   const { user_name, passwd } = req.body;
+  console.log("받은 요청 : ", req.body);
 
   try {
     const result = await registeUser(user_name, passwd);
     if (!result.success) {
       return res.status(400).json({ message: result.message });
     }
-    res.status(201).json({ message: "회원가입 성공" });
+    res.status(201).json({ success: true, user_name: result.user_name });
   } catch (err) {
     res.status(500).json({ message: "회원가입 실패" });
   }
