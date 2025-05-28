@@ -30,8 +30,7 @@ async function loginUser(user_name, passwd) {
   ]);
   const user = result.rows[0];
 
-  if (!user)
-    return { success: false, message: "회원가입되지 않은 아이디입니다." };
+  if (!user) return { success: false, message: "존재하지 않는 아이디입니다." };
 
   const match = await bcrypt.compare(passwd, user.passwd);
   if (!match) return { success: false, message: "잘못된 비밀번호 입니다." };
