@@ -1,25 +1,36 @@
-require("dotenv").config();
-const db = require("./db");
+const app = require("./app");
+const db = require("./src/models/db");
 
-const express = require("express");
-const cors = require("cors");
-const app = express();
 const PORT = process.env.PORT || 4000;
 
-const authRoutes = require("./src/routes/authRoutes");
+// DB 연결 확인 및 실패시 재시도 로직
+let client;
+const MAX_RETRIES = 5;
 
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-  })
-);
-app.use(express.json());
+async function connectToDBWithExponentialBackoff(retry = 0) {
+  const delay = Math.pow(2, retry) * 1000;
+  try {
+    client = await db.connect();
+    console.log("Connected to PostgreSQL");
 
-app.get("/", (req, res) => res.send("Server is running"));
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error(
+      `PostgreSQL connection failed (attempt ${retry + 1}): `,
+      err.message
+    );
+    if (retry < MAX_RETRIES) {
+      console.log(`Retrying in ${delay / 1000} seconds...`);
+      setTimeout(() => connectToDBWithExponentialBackoff(retry + 1), delay);
+    } else {
+      console.error("All DB connection attemps failed. Exiting");
+      process.exit(1);
+    }
+  } finally {
+    if (client) client.release();
+  }
+}
 
-app.use("/auth", authRoutes);
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+connectToDBWithExponentialBackoff();
