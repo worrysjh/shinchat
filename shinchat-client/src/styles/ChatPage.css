@@ -1,0 +1,9 @@
+.chat-page {
+  display: grid;
+  grid-template-columns: 1fr 2fr; /* 좌:우 비율 */
+  height: 100vh;
+}
+
+.chat-page > * {
+  border: 1px solid #ccc;
+}
