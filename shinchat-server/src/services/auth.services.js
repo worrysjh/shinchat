@@ -13,7 +13,6 @@ async function registeUser(user_name, passwd) {
   if (idCheck.rows.length > 0) {
     return { success: false, message: "이미 사용중인 아이디입니다." };
   }
-
   const hashedPasswd = await bcrypt.hash(passwd, 10);
   const result = await pool.query(
     `INSERT INTO users (user_name, passwd) values ($1, $2) RETURNING user_name`,
@@ -33,6 +32,7 @@ async function loginUser(user_name, passwd) {
   if (!user) return { success: false, message: "존재하지 않는 아이디입니다." };
 
   const match = await bcrypt.compare(passwd, user.passwd);
+
   if (!match) return { success: false, message: "잘못된 비밀번호 입니다." };
 
   const { data, iv, tag } = encryptData({

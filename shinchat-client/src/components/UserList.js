@@ -1,13 +1,29 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { authFetch } from "../utils/authFetch";
 
 export default function UserList({ onSelectUser, currentUser }) {
   const [users, setUsers] = useState([]);
 
+  console.log("접속 유저 :", JSON.stringify(currentUser, null, 2));
+
   useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_API_URL}/users/all`)
-      .then((res) => setUsers(res.data));
+    const fetchUsers = async () => {
+      try {
+        const res = await authFetch(
+          `${process.env.REACT_APP_API_URL}/users/all`
+        );
+        if (res && res.ok) {
+          const data = await res.json();
+          setUsers(data);
+        } else {
+          console.error("유저 목록 불러오기 실패", res.status);
+        }
+      } catch (err) {
+        console.error("네트워크 오류", err);
+      }
+    };
+
+    fetchUsers();
   }, []);
 
   return (

@@ -2,19 +2,21 @@ import React, { useState } from "react";
 import { loginUser } from "../actions/authActions";
 import "../styles/LoginPage.css";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function LoginPage() {
   const [user_name, setUserName] = useState("");
   const [passwd, setPasswd] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     const result = await loginUser(user_name, passwd);
 
     if (result.success) {
-      alert("로그인 성공!");
-      // 예: navigate("/profile"); 또는 home으로 이동
+      alert("로그인 성공");
+      navigate("/chat");
     } else {
       setError(result.message);
     }

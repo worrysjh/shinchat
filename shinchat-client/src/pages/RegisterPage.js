@@ -35,7 +35,7 @@ function RegisterPage() {
             required
           />
           <input
-            name="password"
+            name="passwd"
             type="password"
             placeholder="비밀번호"
             onChange={handleChange}

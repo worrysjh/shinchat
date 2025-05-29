@@ -8,7 +8,6 @@ const {
 // 회원가입
 async function register(req, res) {
   const { user_name, passwd } = req.body;
-  console.log("받은 요청 : ", req.body);
 
   try {
     const result = await registeUser(user_name, passwd);
@@ -24,6 +23,7 @@ async function register(req, res) {
 // 로그인
 async function login(req, res) {
   const { user_name, passwd } = req.body;
+  console.log("user id: " + user_name + " / passwd: " + passwd);
 
   try {
     const result = await loginUser(user_name, passwd);
