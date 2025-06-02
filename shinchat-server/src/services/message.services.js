@@ -5,7 +5,7 @@ async function getMessageContent(user_id, target_user_id) {
     `SELECT * FROM messages
         WHERE (sender_id = $1 AND receiver_id = $2)
           OR (sender_id = $2 AND receiver_id = $1)
-        ORDER BY timestamp DESC`,
+        ORDER BY message_id ASC`,
     [user_id, target_user_id]
   );
 

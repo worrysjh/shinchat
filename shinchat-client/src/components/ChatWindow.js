@@ -1,9 +1,17 @@
 import { useEffect, useState } from "react";
 import { socket } from "../utils/socket";
+import "../styles/ChatWindow.css";
 
 export default function ChatWindow({ selectedUser, currentUser }) {
   const [messages, setMessages] = useState([]);
   const [content, setContent] = useState("");
+
+  useEffect(() => {
+    if (currentUser?.user_id) {
+      socket.emit("join", currentUser.user_id);
+      console.log("방 참가: ", currentUser.user_id);
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     if (!selectedUser) return;
@@ -19,12 +27,14 @@ export default function ChatWindow({ selectedUser, currentUser }) {
   }, [selectedUser]);
 
   useEffect(() => {
-    socket.on("receive_message", (message) => {
+    const handleReceive = (message) => {
+      console.log("받은 메시지: ", message);
       setMessages((prev) => [...prev, message]);
-    });
+    };
 
+    socket.on("receive_message", handleReceive);
     return () => {
-      socket.off("receive_message");
+      socket.off("receive_message", handleReceive);
     };
   }, []);
 
@@ -73,9 +83,7 @@ export default function ChatWindow({ selectedUser, currentUser }) {
             <div
               key={i}
               className={
-                messages.sender_id === currentUser.user_id
-                  ? "my-msg"
-                  : "their-msg"
+                msg.sender_id === currentUser.user_id ? "my-msg" : "their-msg"
               }
             >
               {msg.content}
@@ -83,12 +91,14 @@ export default function ChatWindow({ selectedUser, currentUser }) {
           ))
         )}
       </div>
-      <input
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="메시지 입력..."
-      />
-      <button onClick={sendMessage}>보내기</button>
+      <div className="chat-input">
+        <input
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="메시지 입력..."
+        />
+        <button onClick={sendMessage}>보내기</button>
+      </div>
     </div>
   );
 }
