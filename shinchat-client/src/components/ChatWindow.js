@@ -28,14 +28,33 @@ export default function ChatWindow({ selectedUser, currentUser }) {
     };
   }, []);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
+    if (!content.trim()) {
+      alert("빈 메시지는 보낼 수 없습니다.");
+      return;
+    }
     const message = {
       sender_id: currentUser.user_id,
       receiver_id: selectedUser.user_id,
       content,
     };
-
+    // 실시간 전송
     socket.emit("send_message", message);
+
+    //DB 저장 요청
+    try {
+      await fetch(`${process.env.REACT_APP_API_URL}/messages/sendMessage`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        body: JSON.stringify(message),
+      });
+    } catch (err) {
+      console.error("메시지 저장 실패", err);
+    }
+
     setMessages((prev) => [...prev, message]);
     setContent("");
   };
@@ -47,18 +66,22 @@ export default function ChatWindow({ selectedUser, currentUser }) {
     <div className="chat-window">
       <h3>{selectedUser.user_name}와의 대화</h3>
       <div className="message-box">
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={
-              messages.sender_id === currentUser.user_id
-                ? "my-msg"
-                : "their-msg"
-            }
-          >
-            {msg.content}
-          </div>
-        ))}
+        {messages.length === 0 ? (
+          <div className="no-message">대화 내역이 없습니다.</div>
+        ) : (
+          messages.map((msg, i) => (
+            <div
+              key={i}
+              className={
+                messages.sender_id === currentUser.user_id
+                  ? "my-msg"
+                  : "their-msg"
+              }
+            >
+              {msg.content}
+            </div>
+          ))
+        )}
       </div>
       <input
         value={content}
